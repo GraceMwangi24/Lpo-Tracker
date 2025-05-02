@@ -1,41 +1,41 @@
 // client/src/pages/admin/ViewLpos.jsx
-import React, { useEffect, useState, useContext } from 'react'
-import axios from 'axios'
-import { toast } from 'react-toastify'
-import { AuthContext } from '../../context/AuthContext'
+import React, { useEffect, useState, useContext } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function ViewLpos() {
-  const { token } = useContext(AuthContext)
-  const headers   = { Authorization: `Bearer ${token}` }
+  const { token } = useContext(AuthContext);
+  const headers   = { Authorization: `Bearer ${token}` };
 
-  const [lpos, setLpos]     = useState([])
-  const [openId, setOpenId] = useState(null)
+  const [lpos, setLpos]     = useState([]);
+  const [openId, setOpenId] = useState(null);
 
-  // load all LPOs
+  // fetch all LPOs
   const load = () => {
     axios
       .get('http://localhost:5000/lpos', { headers })
       .then(res => setLpos(res.data))
-      .catch(() => toast.error('Error fetching LPOs'))
-  }
-  useEffect(load, [token])
+      .catch(() => toast.error('Error fetching LPOs'));
+  };
+  useEffect(load, [token]);
 
-  const toggle = id => setOpenId(openId === id ? null : id)
+  const toggle = id => setOpenId(openId === id ? null : id);
 
   const updateStatus = (id, status) => {
     axios
       .put(`http://localhost:5000/lpos/${id}`, { status }, { headers })
       .then(() => {
-        toast.success(`LPO #${id} marked ${status}!`)
-        load()
+        toast.success(`LPO #${id} marked ${status}!`);
+        load();
       })
-      .catch(() => toast.error('Failed to update status'))
-  }
+      .catch(() => toast.error('Failed to update status'));
+  };
 
-  // split into sections
-  const pending      = lpos.filter(l => l.status === 'pending')
-  const delivered    = lpos.filter(l => l.status === 'delivered')
-  const notDelivered = lpos.filter(l => l.status === 'not_delivered')
+  // group by status
+  const pending      = lpos.filter(l => l.status === 'pending');
+  const delivered    = lpos.filter(l => l.status === 'delivered');
+  const notDelivered = lpos.filter(l => l.status === 'not_delivered');
 
   function renderSection(title, items) {
     return (
@@ -59,7 +59,7 @@ export default function ViewLpos() {
                       LPO #{l.id} (Req #{l.requisition_id})
                     </div>
                     <div className="text-sm text-gray-600">
-                      Supplier: {l.supplier_id}
+                      Supplier: {l.supplier_name || l.supplier_id}
                     </div>
                   </div>
                   <span
@@ -71,7 +71,7 @@ export default function ViewLpos() {
                         : 'bg-yellow-100 text-yellow-800'
                     }`}
                   >
-                    {l.status.replace('_', ' ').replace(/\b\w/g,c=>c.toUpperCase())}
+                    {l.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
                   </span>
                 </button>
 
@@ -84,7 +84,7 @@ export default function ViewLpos() {
 
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-1">
-                        Products:
+                        Products
                       </h3>
                       {(!l.products || l.products.length === 0) ? (
                         <p className="text-gray-500">No products linked.</p>
@@ -92,9 +92,8 @@ export default function ViewLpos() {
                         <ul className="list-disc list-inside text-gray-700 space-y-1">
                           {l.products.map(p => (
                             <li key={p.product_id}>
-                              {p.product_name} × {p.quantity} @ ₦
-                              {p.price.toFixed(2)} = ₦
-                              {(p.quantity * p.price).toFixed(2)}
+                              {p.product_name} × {p.quantity} @ Ksh {p.price.toFixed(2)}{' '}
+                              = Ksh {(p.quantity * p.price).toFixed(2)}
                             </li>
                           ))}
                         </ul>
@@ -102,7 +101,7 @@ export default function ViewLpos() {
                     </div>
 
                     <p className="text-gray-800">
-                      <strong>Total Value:</strong> ₦{l.total_value.toFixed(2)}
+                      <strong>Total Value:</strong> Ksh {l.total_value.toFixed(2)}
                     </p>
 
                     {/* Action buttons */}
@@ -147,7 +146,7 @@ export default function ViewLpos() {
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -157,5 +156,5 @@ export default function ViewLpos() {
       {renderSection('📦 Delivered', delivered)}
       {renderSection('🚫 Not Delivered', notDelivered)}
     </div>
-  )
+  );
 }

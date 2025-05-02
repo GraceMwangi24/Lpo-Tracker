@@ -180,28 +180,36 @@ def get_requisitions():
         })
     return jsonify(out), 200
 
+from collections import Counter
+
 @app.route('/requisitions', methods=['POST'])
+@jwt_required()
 def create_requisition():
-    data = request.json
+    current = get_jwt_identity()
+    data = request.get_json() or {}
+
     try:
-        # Create the requisition
+        # 1) Create the requisition
         new_req = Requisition(
-            user_id=data['user_id'],
+            user_id=current['id'],
             status=RequisitionStatus(data.get('status', 'pending')),
             notes=data.get('notes', '')
         )
         db.session.add(new_req)
-        db.session.commit()  # Commit to generate ID
+        db.session.commit()  # now new_req.id is available
 
-        # Link products via RequisitionProduct
-        product_ids = data.get('product_ids', [])
-        for pid in product_ids:
-            req_product = RequisitionProduct(
+        # 2) Count each product_id to determine quantity
+        pid_list = data.get('product_ids', [])
+        counts   = Counter(pid_list)
+
+        # 3) Insert one RequisitionProduct per unique product, with aggregated quantity
+        for pid, qty in counts.items():
+            rp = RequisitionProduct(
                 requisition_id=new_req.id,
                 product_id=pid,
-                quantity=1  # Default quantity, or get from data if provided
+                quantity=qty
             )
-            db.session.add(req_product)
+            db.session.add(rp)
 
         db.session.commit()
 
@@ -210,6 +218,7 @@ def create_requisition():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
+
 
 @app.route('/requisitions/<int:req_id>', methods=['PUT'])
 @jwt_required()
