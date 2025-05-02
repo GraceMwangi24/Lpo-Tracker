@@ -3,55 +3,58 @@ import React, { useContext } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
+const adminLinks = [
+  { to: '/admin',               label: 'Dashboard' },
+  { to: '/admin/create-lpo',    label: 'Create LPO' },
+  { to: '/admin/view-lpos',     label: 'View LPOs' },
+  { to: '/admin/view-requisitions', label: 'Requisitions' },
+  { to: '/admin/users',         label: 'Manage Users' },
+];
+
 export default function AdminLayout() {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
+  const navigate   = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/', { replace: true }); // back to sign-in
+    navigate('/', { replace: true });
   };
 
-  const linkClass = ({ isActive }) =>
-    `block px-4 py-2 rounded hover:bg-gray-700 ${
-      isActive ? 'bg-gray-700 text-white' : 'text-gray-300'
-    }`;
-
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-1/5 bg-gray-800 text-gray-300 flex-shrink-0">
-        <div className="p-4 text-2xl font-bold text-white border-b border-gray-700">
-          Admin Panel
-        </div>
-        <nav className="p-4 space-y-2">
-          <NavLink to="/admin/create-lpo"     className={linkClass}>Create LPO</NavLink>
-          <NavLink to="/admin/view-lpos"      className={linkClass}>View LPOs</NavLink>
-          <NavLink to="/admin/view-requisitions" className={linkClass}>View Requisitions</NavLink>
-          <NavLink to="/admin/users"          className={linkClass}>Manage Users</NavLink>
-        </nav>
-      </aside>
-
-      {/* Main area */}
-      <div className="flex-1 flex flex-col">
-        {/* Topbar */}
-        <header className="h-16 bg-white shadow flex items-center justify-between px-6">
-          <div className="text-lg font-medium text-gray-800">
-            Welcome, Admin {user?.id}
-          </div>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* ─── TOP NAV ───────────────────────────────────────────── */}
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
+          <ul className="flex space-x-6 flex-1">
+            {adminLinks.map(item => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.to === '/admin'}
+                  className={({ isActive }) =>
+                    isActive
+                      ? 'text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold'
+                      : 'text-gray-700 hover:text-blue-600'
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
           <button
             onClick={handleLogout}
-            className="text-red-600 hover:text-red-800"
+            className="ml-auto bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
           >
             Logout
           </button>
-        </header>
+        </div>
+      </nav>
 
-        {/* Content */}
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </main>
-      </div>
+      {/* ─── PAGE CONTENT ──────────────────────────────────────── */}
+      <main className="flex-1 overflow-auto p-8">
+        <Outlet />
+      </main>
     </div>
   );
 }

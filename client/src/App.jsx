@@ -5,6 +5,7 @@ import { AuthContext } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 import SignIn          from './pages/SignIn';
 import Dashboard       from './pages/Dashboard';
 
@@ -30,6 +31,7 @@ function PrivateRoute({ adminOnly = false }) {
 export default function App() {
   return (
     <>
+    
       <Routes>
         {/* 1) Root always shows SignIn */}
         <Route path="/" element={<SignIn />} />

@@ -55,6 +55,8 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(200), nullable=True)
 
+    requisition_products = db.relationship('RequisitionProduct',back_populates='product',cascade='all, delete-orphan')   
+
     def __repr__(self):
         return f"<Product id={self.id} name='{self.name}' price={self.price}>"
 
@@ -102,7 +104,7 @@ class Requisition(db.Model):
     notes = db.Column(db.Text)
 
 
-    products = db.relationship('RequisitionProduct', backref='requisition', lazy=True)
+    products = db.relationship('RequisitionProduct', back_populates='requisition', lazy=True)
 
     def __repr__(self):
         return f"<Requisition id={self.id} status='{self.status.value}' user_id={self.user_id}>"
@@ -129,6 +131,10 @@ class RequisitionProduct(db.Model):
     requisition_id = db.Column(db.Integer, db.ForeignKey('requisitions.id'), primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
+
+    product     = db.relationship('Product', back_populates ='requisition_products')
+    requisition = db.relationship('Requisition', back_populates='products')
+
 
     def __repr__(self):
         return f"<RequisitionProduct requisition_id={self.requisition_id} product_id={self.product_id} quantity={self.quantity}>"

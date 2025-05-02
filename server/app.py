@@ -64,9 +64,11 @@ def create_user():
     db.session.commit()
     return jsonify({
         'id':    user.id,
-+       'name':  user.name,
-+       'email': user.email,
-+       'role':  user.role
+       'name':  user.name,
+       'email': user.email,
+       'role':  user.role
+
+       
 }), 201
 
 @app.route('/users', methods=['GET'])
@@ -135,42 +137,48 @@ def update_user(user_id):
 
 # ------------------- REQUISITIONS -------------------
 
+# in app.py
+
 @app.route('/requisitions', methods=['GET'])
 @jwt_required()
 def get_requisitions():
     current = get_jwt_identity()
     query = Requisition.query
-
+    # non-admins only see their own
     if current['role'] != 'admin':
         query = query.filter_by(user_id=current['id'])
 
     status = request.args.get('status')
-    
     if status:
         try:
             query = query.filter_by(status=RequisitionStatus(status))
         except ValueError:
             return jsonify({"error": "Invalid status filter."}), 400
-    
-    return jsonify([{
-        'id': r.id,
-        'user_id': r.user_id,
-        'status': r.status.value,
-        'created_at': r.created_at.isoformat(),
-        'product_ids': [p.product_id for p in r.products]
-    } for r in query.all()])
 
-@app.route('/requisitions/<int:id>', methods=['GET'])
-@jwt_required()
-def get_requisition(id):
-    req = Requisition.query.get_or_404(id)
-    return jsonify({
-        'id': req.id,
-        'user_id': req.user_id,
-        'status': req.status.value,
-        'created_at': req.created_at.isoformat(),
-        'product_ids': [rp.product_id for rp in req.products]
-    })
+    out = []
+    for r in query.order_by(Requisition.created_at.desc()).all():
+        # fetch user name
+        usr = User.query.get(r.user_id)
+        # build product list
+        prods = []
+        for rp in r.products:  # rp is RequisitionProduct
+            p = Product.query.get(rp.product_id)
+            prods.append({
+                'id':       p.id,
+                'name':     p.name,
+                'quantity': rp.quantity,
+                'price':    p.price
+            })
+        out.append({
+            'id':         r.id,
+            'user_id':    r.user_id,
+            'user_name':  usr.name,
+            'status':     r.status.value,
+            'created_at': r.created_at.isoformat(),
+            'notes':      r.notes or '',
+            'products':   prods
+        })
+    return jsonify(out), 200
 
 @app.route('/requisitions', methods=['POST'])
 def create_requisition():
@@ -203,18 +211,39 @@ def create_requisition():
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
+@app.route('/requisitions/<int:req_id>', methods=['PUT'])
+@jwt_required()
+def update_requisition(req_id):
+    current = get_jwt_identity()
+    if current['role'] != 'admin':
+        return jsonify({'error': 'Admins only'}), 403
 
-@app.route('/requisitions/<int:id>', methods=['PUT'])
-def update_requisition(id):
-    req = Requisition.query.get_or_404(id)
-    data = request.json
+    req = Requisition.query.get_or_404(req_id)
+    data = request.get_json() or {}
+
     if 'status' in data:
         try:
             req.status = RequisitionStatus(data['status'])
         except ValueError:
             return jsonify({'error': 'Invalid status value'}), 400
+
     db.session.commit()
-    return jsonify({'message': 'Requisition updated'})
+
+    # re–serialize the single updated requisition:
+    return jsonify({
+        'id':         req.id,
+        'user_id':    req.user_id,
+        'user_name':  req.user.name,
+        'status':     req.status.value,
+        'created_at': req.created_at.isoformat(),
+        'notes':      req.notes or '',
+        'products': [{
+            'id':       rp.product.id,
+            'name':     rp.product.name,
+            'quantity': rp.quantity,
+            'price':    rp.product.price
+        } for rp in req.products]
+    }), 200
 
 @app.route('/requisitions/<int:id>', methods=['DELETE'])
 def delete_requisition(id):
