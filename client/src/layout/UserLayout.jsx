@@ -4,10 +4,10 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const userLinks = [
-  { to: '/dashboard',            label: 'Dashboard' },
-  { to: '/requisitions/new',     label: 'Create Requisition' },
-  { to: '/requisitions',         label: 'My Requisitions' },
-  { to: '/lpos',                 label: 'My LPOs' },
+  { to: '/dashboard',        label: 'Dashboard' },
+  { to: '/requisitions/new', label: 'Create Requisition' },
+  { to: '/requisitions',     label: 'My Requisitions' },
+  { to: '/lpos',             label: 'My LPOs' },
 ];
 
 export default function UserLayout() {
@@ -21,8 +21,8 @@ export default function UserLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* ─── TOP NAV ───────────────────────────────────────────── */}
-      <nav className="bg-white shadow">
+      {}
+      <nav className="bg-white shadow sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
           <ul className="flex space-x-6 flex-1">
             {userLinks.map(item => (
@@ -50,7 +50,7 @@ export default function UserLayout() {
         </div>
       </nav>
 
-      {/* ─── PAGE CONTENT ──────────────────────────────────────── */}
+      {}
       <main className="flex-1 overflow-auto p-8">
         <Outlet />
       </main>

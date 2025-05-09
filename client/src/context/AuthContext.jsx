@@ -17,7 +17,7 @@ function decodeToken(token) {
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // initialize token & user from localStorage
+  
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [user,  setUser]  = useState(() => {
     const t = localStorage.getItem('token');
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
     return decoded?.sub || null;
   });
 
-  // whenever token changes, persist & update user
+  
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -37,7 +37,6 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
-  // login() now returns the raw JWT, so SignIn can decode immediately
   const login = async (email, password) => {
     const jwt = await loginRequest(email, password);
     setToken(jwt);

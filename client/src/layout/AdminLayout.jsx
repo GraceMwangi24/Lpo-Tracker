@@ -4,11 +4,11 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const adminLinks = [
-  { to: '/admin',               label: 'Dashboard' },
-  { to: '/admin/create-lpo',    label: 'Create LPO' },
-  { to: '/admin/view-lpos',     label: 'View LPOs' },
+  { to: '/admin',                   label: 'Dashboard' },
   { to: '/admin/view-requisitions', label: 'Requisitions' },
-  { to: '/admin/users',         label: 'Manage Users' },
+  { to: '/admin/create-lpo',        label: 'Create LPO' },
+  { to: '/admin/view-lpos',         label: 'View LPOs' },
+  { to: '/admin/users',             label: 'Manage Users' },
 ];
 
 export default function AdminLayout() {
@@ -22,8 +22,8 @@ export default function AdminLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* ─── TOP NAV ───────────────────────────────────────────── */}
-      <nav className="bg-white shadow">
+      {}
+      <nav className="bg-white shadow sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16">
           <ul className="flex space-x-6 flex-1">
             {adminLinks.map(item => (
@@ -51,8 +51,8 @@ export default function AdminLayout() {
         </div>
       </nav>
 
-      {/* ─── PAGE CONTENT ──────────────────────────────────────── */}
-      <main className="flex-1 overflow-auto p-8">
+      {}
+      <main className="flex-1 overflow-auto p-8 mt-0">
         <Outlet />
       </main>
     </div>

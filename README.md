@@ -1,12 +1,114 @@
-# React + Vite
+LPO Tracker
+A full-stack web application for managing purchase requisitions and Local Purchase Orders (LPOs). Built with React, Tailwind CSS & Vite on the frontend, Flask & SQLAlchemy on the backend, and JWT for authentication.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🚀 Features
+User
 
-Currently, two official plugins are available:
+Sign in/out
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Create requisitions (select products + quantities + notes)
 
-## Expanding the ESLint configuration
+View own requisitions (Pending / Approved / Rejected)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Recall (delete) pending requisitions
+
+View LPOs assigned to their requisitions
+
+Admin
+
+Sign in/out
+
+Dashboard with KPI cards and quick-links
+
+Manage users (CRUD + password resets + inline editing)
+
+Approve/reject requisitions
+
+Create LPOs for approved requisitions (assign supplier + unit prices)
+
+View & update LPO status (Pending / Delivered / Not Delivered)
+
+📦 Tech Stack
+Frontend:
+
+React 17, React Router v6
+
+Vite, Tailwind CSS, React-Toastify, React-Icons
+
+JWT stored in localStorage
+
+Backend:
+
+Flask, Flask-SQLAlchemy, Flask-Migrate
+
+Flask-JWT-Extended for auth
+
+SQLite (dev) / easily swapped for PostgreSQL
+
+CORS enabled for the Vite dev server
+
+⚙️ Getting Started
+Prerequisites
+Node.js ≥ 16
+
+Python ≥ 3.8
+
+pipenv or virtualenv (optional but recommended)
+
+Backend
+bash
+Copy code
+cd server
+pip install 
+export FLASK_APP=app.py
+flask db upgrade      # Apply migrations
+flask run             # Starts API @ http://127.0.0.1:5000
+
+
+Frontend
+bash
+Copy code
+cd client
+npm install
+npm run dev           # Starts Vite @ http://localhost:5174
+Your browser should open http://localhost:5174 and show the Sign-In page.
+
+
+🔗 API Endpoints (Summary)
+Auth
+POST /login
+Request: { email, password }
+Response: { access_token }
+
+Users (Admin-only)
+GET /users
+
+POST /users
+
+PUT /users/:id
+
+PUT /users/:id/password
+
+Requisitions
+GET /requisitions?status=
+
+POST /requisitions
+
+PUT /requisitions/:id (Admin-only)
+
+DELETE /requisitions/:id
+
+LPOs
+GET /lpos?sort=
+
+POST /lpos
+
+PUT /lpos/:id
+
+Products & Suppliers
+GET /products / POST /products / PUT /products/:id / DELETE /products/:id
+
+GET /suppliers / POST /suppliers / PUT /suppliers/:id / DELETE /suppliers/:id
+
+
+

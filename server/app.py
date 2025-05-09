@@ -254,15 +254,27 @@ def update_requisition(req_id):
         } for rp in req.products]
     }), 200
 
-@app.route('/requisitions/<int:id>', methods=['DELETE'])
-def delete_requisition(id):
-    req = Requisition.query.get_or_404(id)
-    lpo = LPO.query.filter_by(requisition_id=req.id).first()
-    if lpo:
-        return jsonify({'error': 'Cannot delete requisition linked to an LPO'}), 400
+
+
+@app.route('/requisitions/<int:req_id>', methods=['DELETE'])
+@jwt_required()
+def delete_requisition(req_id):
+    current = get_jwt_identity()
+    req = Requisition.query.get_or_404(req_id)
+
+    # permission + status checks...
+    if req.status != RequisitionStatus.PENDING:
+        return jsonify({'error': 'Only pending can be recalled'}), 400
+
+    # manually delete the line‐items
+    for rp in list(req.products):
+        db.session.delete(rp)
+
+    # now delete the requisition
     db.session.delete(req)
     db.session.commit()
-    return jsonify({'message': 'Requisition deleted'})
+    return jsonify({'message': f'Requisition #{req_id} recalled'}), 200
+
 
 # ------------------- LPOs -------------------
 

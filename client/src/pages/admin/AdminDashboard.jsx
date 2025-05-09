@@ -17,22 +17,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` };
 
-    // 1) Users count
-    axios
-      .get('http://localhost:5000/users', { headers })
-      .then(res => {
-        setCounts(c => ({ ...c, users: res.data.length }));
-      })
-      .catch(console.error);
-
-    // 2) Requisition counts + recent
-    axios
-      .get('http://localhost:5000/requisitions', { headers })
+    // 1) Total requisitions + pending count + recent
+    axios.get('http://localhost:5000/requisitions', { headers })
       .then(res => {
         const all = res.data.length;
         const pending = res.data.filter(x => x.status === 'pending').length;
         setCounts(c => ({ ...c, allReqs: all, pendingReqs: pending }));
-        // grab last 5, sorted by created_at descending
+
         const sorted = [...res.data].sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
@@ -40,11 +31,17 @@ export default function AdminDashboard() {
       })
       .catch(console.error);
 
-    // 3) LPO count
-    axios
-      .get('http://localhost:5000/lpos', { headers })
+    // 2) Total LPOs
+    axios.get('http://localhost:5000/lpos', { headers })
       .then(res => {
         setCounts(c => ({ ...c, lpos: res.data.length }));
+      })
+      .catch(console.error);
+
+    // 3) Total users
+    axios.get('http://localhost:5000/users', { headers })
+      .then(res => {
+        setCounts(c => ({ ...c, users: res.data.length }));
       })
       .catch(console.error);
   }, [token]);
@@ -53,27 +50,46 @@ export default function AdminDashboard() {
     <div>
       <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
 
-      {/* KPI cards */}
+      {/* KPI cards in new order */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Link to="/admin/users" className="block bg-white p-6 rounded shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500 uppercase">Total Users</p>
-          <p className="mt-2 text-2xl font-semibold">{counts.users}</p>
-        </Link>
-        <Link to="/admin/view-requisitions" className="block bg-white p-6 rounded shadow hover:shadow-lg transition">
+        {/* 1) All Requisitions */}
+        <Link
+          to="/admin/view-requisitions"
+          className="block bg-white p-6 rounded shadow hover:shadow-lg transition"
+        >
           <p className="text-sm text-gray-500 uppercase">All Requisitions</p>
           <p className="mt-2 text-2xl font-semibold">{counts.allReqs}</p>
         </Link>
-        <Link to="/admin/create-lpo" className="block bg-white p-6 rounded shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500 uppercase">Pending LPOs</p>
+
+        {/* 2) Create LPO (pending requisitions count) */}
+        <Link
+          to="/admin/create-lpo"
+          className="block bg-white p-6 rounded shadow hover:shadow-lg transition"
+        >
+          <p className="text-sm text-gray-500 uppercase">Create LPO</p>
           <p className="mt-2 text-2xl font-semibold">{counts.pendingReqs}</p>
         </Link>
-        <Link to="/admin/view-lpos" className="block bg-white p-6 rounded shadow hover:shadow-lg transition">
-          <p className="text-sm text-gray-500 uppercase">Total LPOs</p>
+
+        {/* 3) View LPOs */}
+        <Link
+          to="/admin/view-lpos"
+          className="block bg-white p-6 rounded shadow hover:shadow-lg transition"
+        >
+          <p className="text-sm text-gray-500 uppercase">View LPOs</p>
           <p className="mt-2 text-2xl font-semibold">{counts.lpos}</p>
+        </Link>
+
+        {/* 4) Total Users */}
+        <Link
+          to="/admin/users"
+          className="block bg-white p-6 rounded shadow hover:shadow-lg transition"
+        >
+          <p className="text-sm text-gray-500 uppercase">Total Users</p>
+          <p className="mt-2 text-2xl font-semibold">{counts.users}</p>
         </Link>
       </div>
 
-      {/* Recent requisitions */}
+      {/* Recent Requisitions */}
       <div className="bg-white p-6 rounded shadow">
         <h3 className="text-xl font-semibold mb-4">Recent Requisitions</h3>
         <ul className="space-y-2">
@@ -98,5 +114,5 @@ export default function AdminDashboard() {
         </ul>
       </div>
     </div>
-);
+  );
 }

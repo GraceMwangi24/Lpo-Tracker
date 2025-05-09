@@ -24,9 +24,9 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)  # Email must be unique
+    email = db.Column(db.String(100), unique=True, nullable=False)  
     password_hash = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default='user')  # Default role is 'user'
+    role = db.Column(db.String(50), nullable=False, default='user')  
     requisitions = db.relationship('Requisition', backref='user', lazy=True)
 
     @validates('email')
@@ -37,7 +37,7 @@ class User(db.Model):
 
     @validates('password_hash')
     def validate_password(self, _, value):
-        if len(value) < 100:  # Assuming a hashed password length for comparison
+        if len(value) < 100:  
             value = generate_password_hash(value)
         return value
 
